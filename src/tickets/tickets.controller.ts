@@ -1,29 +1,23 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Logger,
-  HttpStatus,
-  Query,
-} from '@nestjs/common';
+import { Controller, Logger, HttpStatus, Body, Post } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
-import { CreateTicketDto } from './dto/create-ticket.dto';
-import { UpdateTicketDto } from './dto/update-ticket.dto';
 import {
   Ctx,
   MessagePattern,
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
+import { CreateTicketDto } from 'src/dtos/create-ticket.dto';
+import { GuestsService } from 'src/guests/guests.service';
+import { ContactsService } from 'src/contacts/contacts.service';
 
 @Controller('tickets')
 export class TicketsController {
   private readonly logger = new Logger('TicketController');
-  constructor(private readonly ticketsService: TicketsService) {}
+  constructor(
+    private readonly ticketsService: TicketsService,
+    private readonly guestsService: GuestsService,
+    private readonly contactsService: ContactsService,
+  ) {}
 
   @MessagePattern('create_ticket')
   async create(
@@ -32,62 +26,30 @@ export class TicketsController {
   ) {
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
+    const { guests, contact, scheduleDetailId, totalPrice } = createTicketDto;
     try {
-      const ticket = await this.ticketsService.postTicket(createTicketDto);
-      return { ticket };
-    } catch (error) {
-      this.logger.error(error.message);
-      throw HttpStatus.SERVICE_UNAVAILABLE;
-    } finally {
-      channel.ack(originalMessage);
-    }
-  }
-
-  @MessagePattern('get_tickets_by_contact')
-  async getTicketsByContact(
-    @Payload() contactId: string,
-    @Ctx() context: RmqContext,
-  ) {
-    const channel = context.getChannelRef();
-    const originalMessage = context.getMessage();
-    try {
-      const tickets = await this.ticketsService.getTicketsByContact(contactId);
-      return { tickets };
-    } catch (error) {
-      this.logger.error(error.message);
-      throw HttpStatus.SERVICE_UNAVAILABLE;
-    } finally {
-      channel.ack(originalMessage);
-    }
-  }
-
-  @MessagePattern('get_tickets_by_schedule_detail')
-  async getTicketsByScheduleDetail(
-    @Payload() scheduleDetailId: string,
-    @Ctx() context: RmqContext,
-  ) {
-    const channel = context.getChannelRef();
-    const originalMessage = context.getMessage();
-    try {
-      const tickets = await this.ticketsService.getTicketsByScheduleDetail(
+      const ticket = await this.ticketsService.postTicket(
         scheduleDetailId,
+        totalPrice,
       );
-      return { tickets };
+      const contactTemp = await this.contactsService.postContact(contact);
+      const guestsTemp = await Promise.all(
+        guests.map(async (guest) => {
+          const guestTemp = await this.guestsService.postGuest(guest);
+          await this.ticketsService.postTicketsDetail(
+            ticket.id,
+            contactTemp.id,
+            guestTemp.id,
+          );
+          return guestTemp;
+        }),
+      );
+      return { ...ticket, guestsTemp, contactTemp };
     } catch (error) {
       this.logger.error(error.message);
       throw HttpStatus.SERVICE_UNAVAILABLE;
     } finally {
       channel.ack(originalMessage);
     }
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTicketDto: UpdateTicketDto) {
-    return this.ticketsService.update(+id, updateTicketDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ticketsService.remove(+id);
   }
 }

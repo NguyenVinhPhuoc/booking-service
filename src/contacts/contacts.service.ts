@@ -2,8 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseError, QueryTypes } from 'sequelize';
 import { Sequelize } from 'sequelize';
 import { Contact } from './contact.model';
-import { CreateContactDto } from './dto/create-contact.dto';
-import { UpdateContactDto } from './dto/update-contact.dto';
+import { CreateContactDto } from '../dtos/create-contact.dto';
 
 @Injectable()
 export class ContactsService {
@@ -62,10 +61,6 @@ export class ContactsService {
       this.logger.error(error.message);
       throw new DatabaseError(error);
     }
-  }
-
-  update(id: number, updateContactDto: UpdateContactDto) {
-    return `This action updates a #${id} contact`;
   }
 
   remove(id: number) {

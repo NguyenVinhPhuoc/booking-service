@@ -1,25 +1,24 @@
 import { Injectable, Logger, Query } from '@nestjs/common';
 import { DatabaseError, QueryTypes } from 'sequelize';
 import { Sequelize } from 'sequelize';
-import { CreateTicketDto } from './dto/create-ticket.dto';
-import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { CreateTicketDetailDto } from 'src/dtos/create-ticket-detail.dto';
 import { Ticket } from './ticket.model';
+import { TicketDetail } from './ticketDetail.model';
 
 @Injectable()
 export class TicketsService {
   private readonly logger = new Logger('TicketService');
   constructor(private sequelize: Sequelize) {}
 
-  async postTicket(createTicketDto: CreateTicketDto) {
+  async postTicket(scheduleDetailId: string, totalPrice: number) {
     try {
       const ticket = await this.sequelize.query(
-        `SP_CreateTicket @scheduleDetailId=:scheduleDetailId, @contactId=:contactId, @customerFullName=:customerFullName, @isSubContact=:isSubContact`,
+        `SP_CreateTicket @scheduleDetailId=:scheduleDetailId` +
+          `, @totalPrice=:totalPrice`,
         {
           replacements: {
-            scheduleDetailId: createTicketDto.scheduleDetailId,
-            contactId: createTicketDto.contactId,
-            customerFullName: createTicketDto.customerFullName,
-            isSubContact: createTicketDto.isSubContact,
+            scheduleDetailId: scheduleDetailId,
+            totalPrice: totalPrice,
           },
           type: QueryTypes.SELECT,
           mapToModel: true,
@@ -72,11 +71,26 @@ export class TicketsService {
     }
   }
 
-  update(id: number, updateTicketDto: UpdateTicketDto) {
-    return `This action updates a #${id} ticket`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} ticket`;
+  async postTicketsDetail(
+    ticketId: string,
+    contactId: string,
+    guestId: string,
+  ) {
+    try {
+      await this.sequelize.query(
+        `SP_CreateTicketDetail @ticketId=:ticketId, @contactId=:contactId, @guestId=:guestId`,
+        {
+          replacements: {
+            ticketId: ticketId,
+            contactId: contactId,
+            guestId: guestId,
+          },
+          type: QueryTypes.SELECT,
+          raw: true,
+          mapToModel: true,
+          model: TicketDetail,
+        },
+      );
+    } catch (error) {}
   }
 }

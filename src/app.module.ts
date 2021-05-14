@@ -5,6 +5,7 @@ import { TicketsModule } from './tickets/tickets.module';
 import { TicketsController } from './tickets/tickets.controller';
 import { TicketsService } from './tickets/tickets.service';
 import { ContactsModule } from './contacts/contacts.module';
+import { GuestsModule } from './guests/guests.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ContactsModule } from './contacts/contacts.module';
     }),
     TicketsModule,
     ContactsModule,
+    GuestsModule,
   ],
   controllers: [TicketsController],
   providers: [TicketsService],
