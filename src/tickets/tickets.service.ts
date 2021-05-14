@@ -1,7 +1,6 @@
 import { Injectable, Logger, Query } from '@nestjs/common';
 import { DatabaseError, QueryTypes } from 'sequelize';
 import { Sequelize } from 'sequelize';
-import { CreateTicketDetailDto } from 'src/dtos/create-ticket-detail.dto';
 import { Ticket } from './ticket.model';
 import { TicketDetail } from './ticketDetail.model';
 
