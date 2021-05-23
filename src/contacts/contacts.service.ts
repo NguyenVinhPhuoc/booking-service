@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseError, QueryTypes } from 'sequelize';
 import { Sequelize } from 'sequelize';
-import { Contact } from './contact.model';
+import { Contact } from '../models/contact.model';
 import { CreateContactDto } from '../dtos/create-contact.dto';
 
 @Injectable()

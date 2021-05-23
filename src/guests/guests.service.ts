@@ -2,7 +2,7 @@ import { Injectable, Logger, Query } from '@nestjs/common';
 import { DatabaseError, QueryTypes } from 'sequelize';
 import { Sequelize } from 'sequelize';
 import { CreateGuestDto } from 'src/dtos/create-guest.dto';
-import { Guest } from './guests.model';
+import { Guest } from '../models/guests.model';
 
 @Injectable()
 export class GuestsService {
@@ -28,17 +28,5 @@ export class GuestsService {
       this.logger.error(error.message);
       throw new DatabaseError(error);
     }
-  }
-
-  findAll() {
-    return `This action returns all guests`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} guest`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} guest`;
   }
 }

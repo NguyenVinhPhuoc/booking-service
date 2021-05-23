@@ -6,21 +6,25 @@ import { TicketsController } from './tickets/tickets.controller';
 import { TicketsService } from './tickets/tickets.service';
 import { ContactsModule } from './contacts/contacts.module';
 import { GuestsModule } from './guests/guests.module';
+import { TicketPoliciesModule } from './ticket-policies/ticket-policies.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({}),
     SequelizeModule.forRoot({
       dialect: 'mssql',
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      host: process.env.DB_HOST_LOCAL,
+      port: Number(process.env.DB_PORT_LOCAL),
+      username: process.env.DB_USERNAME_LOCAL,
+      password: process.env.DB_PASSWORD_LOCAL,
+      database: process.env.DB_NAME_LOCAL,
     }),
     TicketsModule,
     ContactsModule,
     GuestsModule,
+    TicketPoliciesModule,
+    PaymentModule,
   ],
   controllers: [TicketsController],
   providers: [TicketsService],

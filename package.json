@@ -30,6 +30,7 @@
     "@nestjs/platform-express": "^7.6.15",
     "@nestjs/sequelize": "^0.2.0",
     "@nestjs/terminus": "^7.1.2",
+    "@paypal/checkout-server-sdk": "^1.0.2",
     "amqp-connection-manager": "^3.2.2",
     "amqplib": "^0.7.1",
     "reflect-metadata": "^0.1.13",

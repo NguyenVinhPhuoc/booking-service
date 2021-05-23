@@ -1,7 +1,8 @@
-import { Injectable, Logger, Query } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseError, QueryTypes } from 'sequelize';
 import { Sequelize } from 'sequelize';
-import { Ticket } from './ticket.model';
+import { vehicleType } from 'src/enums/vehicleType.enum';
+import { Ticket } from '../models/ticket.model';
 import { TicketDetail } from './ticketDetail.model';
 
 @Injectable()
@@ -9,15 +10,22 @@ export class TicketsService {
   private readonly logger = new Logger('TicketService');
   constructor(private sequelize: Sequelize) {}
 
-  async postTicket(scheduleDetailId: string, totalPrice: number) {
+  async postTicket(
+    scheduleDetailId: string,
+    totalPrice: number,
+    vehicleType: string,
+    captureId: string,
+  ) {
     try {
       const ticket = await this.sequelize.query(
         `SP_CreateTicket @scheduleDetailId=:scheduleDetailId` +
-          `, @totalPrice=:totalPrice`,
+          `, @totalPrice=:totalPrice, @vehicleType=:vehicleType, @captureId=:captureId`,
         {
           replacements: {
             scheduleDetailId: scheduleDetailId,
             totalPrice: totalPrice,
+            vehicleType: vehicleType,
+            captureId: captureId,
           },
           type: QueryTypes.SELECT,
           mapToModel: true,
@@ -90,6 +98,23 @@ export class TicketsService {
           model: TicketDetail,
         },
       );
-    } catch (error) {}
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  async getCaptureId(id: string) {
+    try {
+      const captureId = await this.sequelize.query('SP_GetCaptureId @id=:id', {
+        replacements: { id },
+        type: QueryTypes.SELECT,
+        raw: true,
+      });
+      return captureId;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
   }
 }

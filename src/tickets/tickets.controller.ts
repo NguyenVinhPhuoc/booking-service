@@ -9,6 +9,7 @@ import {
 import { CreateTicketDto } from 'src/dtos/create-ticket.dto';
 import { GuestsService } from 'src/guests/guests.service';
 import { ContactsService } from 'src/contacts/contacts.service';
+import { vehicleType } from 'src/enums/vehicleType.enum';
 
 @Controller('tickets')
 export class TicketsController {
@@ -26,11 +27,20 @@ export class TicketsController {
   ) {
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
-    const { guests, contact, scheduleDetailId, totalPrice } = createTicketDto;
+    const {
+      guests,
+      contact,
+      scheduleDetailId,
+      totalPrice,
+      captureId,
+      vehicleType,
+    } = createTicketDto;
     try {
       const ticket = await this.ticketsService.postTicket(
         scheduleDetailId,
         totalPrice,
+        vehicleType,
+        captureId,
       );
       const contactTemp = await this.contactsService.postContact(contact);
       const guestsTemp = await Promise.all(

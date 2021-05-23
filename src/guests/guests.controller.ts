@@ -18,19 +18,4 @@ export class GuestsController {
   create(@Body() createGuestDto: CreateGuestDto) {
     return this.guestsService.postGuest(createGuestDto);
   }
-
-  @Get()
-  findAll() {
-    return this.guestsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.guestsService.findOne(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.guestsService.remove(+id);
-  }
 }
