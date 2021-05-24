@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseError, QueryTypes } from 'sequelize';
 import { Sequelize } from 'sequelize';
-import { vehicleType } from 'src/enums/vehicleType.enum';
 import { Ticket } from '../models/ticket.model';
 import { TicketDetail } from './ticketDetail.model';
 
@@ -15,17 +14,19 @@ export class TicketsService {
     totalPrice: number,
     vehicleType: string,
     captureId: string,
+    classId: string,
   ) {
     try {
       const ticket = await this.sequelize.query(
         `SP_CreateTicket @scheduleDetailId=:scheduleDetailId` +
-          `, @totalPrice=:totalPrice, @vehicleType=:vehicleType, @captureId=:captureId`,
+          `, @totalPrice=:totalPrice, @vehicleType=:vehicleType, @captureId=:captureId, @classId=:classId`,
         {
           replacements: {
             scheduleDetailId: scheduleDetailId,
             totalPrice: totalPrice,
             vehicleType: vehicleType,
             captureId: captureId,
+            classId: classId,
           },
           type: QueryTypes.SELECT,
           mapToModel: true,
@@ -46,25 +47,6 @@ export class TicketsService {
         `SP_GetTicketsByScheduleDetail @scheduleDetailId=:scheduleDetailId`,
         {
           replacements: { scheduleDetailId },
-          type: QueryTypes.SELECT,
-          raw: true,
-          mapToModel: true,
-          model: Ticket,
-        },
-      );
-      return tickets;
-    } catch (error) {
-      this.logger.error(error.message);
-      throw new DatabaseError(error);
-    }
-  }
-
-  async getTicketsByContact(contactId: string) {
-    try {
-      const tickets = await this.sequelize.query(
-        `SP_GetTicketsByContact @contactId=:contactId`,
-        {
-          replacements: { contactId },
           type: QueryTypes.SELECT,
           raw: true,
           mapToModel: true,
@@ -104,14 +86,19 @@ export class TicketsService {
     }
   }
 
-  async getCaptureId(id: string) {
+  async GetTicketsByEmail(email: string) {
     try {
-      const captureId = await this.sequelize.query('SP_GetCaptureId @id=:id', {
-        replacements: { id },
-        type: QueryTypes.SELECT,
-        raw: true,
-      });
-      return captureId;
+      const tickets = await this.sequelize.query(
+        'SP_GetTicketsByEmail @email=:email',
+        {
+          replacements: { email },
+          type: QueryTypes.SELECT,
+          raw: true,
+          mapToModel: true,
+          model: Ticket,
+        },
+      );
+      return tickets;
     } catch (error) {
       this.logger.error(error.message);
       throw new DatabaseError(error);

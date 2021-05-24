@@ -5,6 +5,7 @@ export class CreateTicketDto {
   totalPrice: number;
   vehicleType: string;
   captureId: string;
+  classId: string;
   contact: CreateContactDto;
   guests: CreateGuestDto[];
 }

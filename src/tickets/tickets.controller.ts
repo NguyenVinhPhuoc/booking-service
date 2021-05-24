@@ -21,7 +21,7 @@ export class TicketsController {
   ) {}
 
   @MessagePattern('create_ticket')
-  async create(
+  async createTicket(
     @Payload() createTicketDto: CreateTicketDto,
     @Ctx() context: RmqContext,
   ) {
@@ -34,6 +34,7 @@ export class TicketsController {
       totalPrice,
       captureId,
       vehicleType,
+      classId,
     } = createTicketDto;
     try {
       const ticket = await this.ticketsService.postTicket(
@@ -41,6 +42,7 @@ export class TicketsController {
         totalPrice,
         vehicleType,
         captureId,
+        classId,
       );
       const contactTemp = await this.contactsService.postContact(contact);
       const guestsTemp = await Promise.all(
@@ -55,6 +57,21 @@ export class TicketsController {
         }),
       );
       return { ...ticket, guestsTemp, contactTemp };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw HttpStatus.SERVICE_UNAVAILABLE;
+    } finally {
+      channel.ack(originalMessage);
+    }
+  }
+
+  @MessagePattern('get_tickets_by_email')
+  async getTicketByEmail(@Payload() email: string, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
+    try {
+      const tickets = await this.ticketsService.GetTicketsByEmail(email);
+      return tickets;
     } catch (error) {
       this.logger.error(error.message);
       throw HttpStatus.SERVICE_UNAVAILABLE;
