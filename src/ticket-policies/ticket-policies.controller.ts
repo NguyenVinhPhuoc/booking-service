@@ -1,20 +1,10 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
+import { Controller, Patch } from '@nestjs/common';
 import {
   Ctx,
   MessagePattern,
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import { mapFinderOptions } from 'sequelize/types/lib/utils';
 import { CancellationTicketDto } from 'src/dtos/create-cancel-ticket.dtos';
 import { PaymentService } from 'src/payment/payment.service';
 import { TicketPoliciesService } from './ticket-policies.service';
