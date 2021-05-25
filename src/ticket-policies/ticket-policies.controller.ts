@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import {
   Ctx,
@@ -26,6 +27,7 @@ export class TicketPoliciesController {
   ) {}
 
   @MessagePattern('refund_ticket')
+  @Patch()
   async createCancellationTicket(
     @Payload() cancellationTicketDto: CancellationTicketDto,
     @Ctx() context: RmqContext,

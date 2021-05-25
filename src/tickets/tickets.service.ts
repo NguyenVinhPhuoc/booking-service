@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DatabaseError, QueryTypes } from 'sequelize';
 import { Sequelize } from 'sequelize';
+import { TicketContact } from 'src/models/get-ticket-contact.model';
 import { Ticket } from '../models/ticket.model';
 import { TicketDetail } from './ticketDetail.model';
 
@@ -99,6 +100,25 @@ export class TicketsService {
         },
       );
       return tickets;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  async GetTicketsByScheduleDetailId(scheduleDetailId: string) {
+    try {
+      const ticketContacts = await this.sequelize.query(
+        'SP_GetTicketsByScheduleDetailId @scheduleDetailId=:scheduleDetailId',
+        {
+          replacements: { scheduleDetailId },
+          type: QueryTypes.SELECT,
+          raw: true,
+          mapToModel: true,
+          model: TicketContact,
+        },
+      );
+      return ticketContacts;
     } catch (error) {
       this.logger.error(error.message);
       throw new DatabaseError(error);

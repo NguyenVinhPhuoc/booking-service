@@ -13,7 +13,7 @@ export class TicketPoliciesService {
         'SP_CreateCancellationTicket @oldTicketId=:oldTicketId,' +
           ' @lostPercentage=:lostPercentage',
         {
-          replacements: { ...cancellationTicketDto },
+          replacements: { cancellationTicketDto },
           type: QueryTypes.SELECT,
           mapToModel: true,
           model: CancellationTickets,

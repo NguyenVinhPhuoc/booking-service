@@ -36,6 +36,8 @@ export class TicketsController {
       vehicleType,
       classId,
     } = createTicketDto;
+    console.log(createTicketDto);
+
     try {
       const ticket = await this.ticketsService.postTicket(
         scheduleDetailId,
@@ -71,6 +73,26 @@ export class TicketsController {
     const originalMessage = context.getMessage();
     try {
       const tickets = await this.ticketsService.GetTicketsByEmail(email);
+      return tickets;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw HttpStatus.SERVICE_UNAVAILABLE;
+    } finally {
+      channel.ack(originalMessage);
+    }
+  }
+
+  @MessagePattern('get_ticket_by_scheduleDetailId')
+  async getTicketsByScheduleDetailId(
+    @Payload() scheduleDetailId: string,
+    @Ctx() context: RmqContext,
+  ) {
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
+    try {
+      const tickets = await this.ticketsService.GetTicketsByScheduleDetailId(
+        scheduleDetailId,
+      );
       return tickets;
     } catch (error) {
       this.logger.error(error.message);
