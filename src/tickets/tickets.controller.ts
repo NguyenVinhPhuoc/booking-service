@@ -36,8 +36,6 @@ export class TicketsController {
       vehicleType,
       classId,
     } = createTicketDto;
-    console.log(createTicketDto);
-
     try {
       const ticket = await this.ticketsService.postTicket(
         scheduleDetailId,
@@ -58,7 +56,12 @@ export class TicketsController {
           return guestTemp;
         }),
       );
-      return { ...ticket, guestsTemp, contactTemp };
+      return {
+        ...ticket,
+        guestsTemp,
+        contactTemp,
+        numberOfTicket: guests.length,
+      };
     } catch (error) {
       this.logger.error(error.message);
       throw HttpStatus.SERVICE_UNAVAILABLE;
