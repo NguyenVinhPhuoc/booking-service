@@ -28,15 +28,13 @@ export class TicketsController {
     private readonly contactsService: ContactsService,
   ) {}
 
-  // @MessagePattern('create_ticket')
-  @Post()
+  @MessagePattern('create_ticket')
   async createTicket(
-    // @Payload() createTicketDto: CreateTicketDto,
-    // @Ctx() context: RmqContext,
-    @Body() createTicketDto: CreateTicketDto,
+    @Payload() createTicketDto: CreateTicketDto,
+    @Ctx() context: RmqContext,
   ) {
-    // const channel = context.getChannelRef();
-    // const originalMessage = context.getMessage();
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
     const {
       guests,
       contact,
@@ -76,19 +74,14 @@ export class TicketsController {
       this.logger.error(error.message);
       throw HttpStatus.SERVICE_UNAVAILABLE;
     } finally {
-      // channel.ack(originalMessage);
+      channel.ack(originalMessage);
     }
   }
 
-  // @MessagePattern('get_tickets_by_email')
-  @Get()
-  async getTicketByEmail(
-    //   @Payload() email: string,
-    //  @Ctx() context: RmqContext
-    @Query('email') email: string,
-  ) {
-    // const channel = context.getChannelRef();
-    // const originalMessage = context.getMessage();
+  @MessagePattern('get_tickets_by_email')
+  async getTicketByEmail(@Payload() email: string, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
     try {
       const tickets = await this.ticketsService.GetTicketsByEmail(email);
       return tickets;
@@ -96,7 +89,7 @@ export class TicketsController {
       this.logger.error(error.message);
       throw HttpStatus.SERVICE_UNAVAILABLE;
     } finally {
-      // channel.ack(originalMessage);
+      channel.ack(originalMessage);
     }
   }
 
