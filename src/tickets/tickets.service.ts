@@ -12,22 +12,27 @@ export class TicketsService {
 
   async postTicket(
     scheduleDetailId: string,
-    totalPrice: number,
+    ticketPrice: number,
     vehicleType: string,
     captureId: string,
     classId: string,
+    title: string,
+    fullName: string,
   ) {
     try {
       const ticket = await this.sequelize.query(
         `SP_CreateTicket @scheduleDetailId=:scheduleDetailId` +
-          `, @totalPrice=:totalPrice, @vehicleType=:vehicleType, @captureId=:captureId, @classId=:classId`,
+          `, @totalPrice=:totalPrice, @vehicleType=:vehicleType, @captureId=:captureId, ` +
+          `@classId=:classId, @title=:title, @fullName=:fullName`,
         {
           replacements: {
             scheduleDetailId: scheduleDetailId,
-            totalPrice: totalPrice,
+            ticketPrice: ticketPrice,
             vehicleType: vehicleType,
             captureId: captureId,
             classId: classId,
+            title: title,
+            fullName: fullName,
           },
           type: QueryTypes.SELECT,
           mapToModel: true,
@@ -45,7 +50,7 @@ export class TicketsService {
   async getTicketsByScheduleDetail(scheduleDetailId: string) {
     try {
       const tickets = await this.sequelize.query(
-        `SP_GetTicketsByScheduleDetail @scheduleDetailId=:scheduleDetailId`,
+        'SP_GetTicketsByScheduleDetail @scheduleDetailId=:scheduleDetailId',
         {
           replacements: { scheduleDetailId },
           type: QueryTypes.SELECT,
@@ -61,19 +66,14 @@ export class TicketsService {
     }
   }
 
-  async postTicketsDetail(
-    ticketId: string,
-    contactId: string,
-    guestId: string,
-  ) {
+  async postTicketsDetail(ticketId: string, contactId: string) {
     try {
       await this.sequelize.query(
-        `SP_CreateTicketDetail @ticketId=:ticketId, @contactId=:contactId, @guestId=:guestId`,
+        'SP_CreateTicketDetail @ticketId=:ticketId, @contactId=:contactId',
         {
           replacements: {
             ticketId: ticketId,
             contactId: contactId,
-            guestId: guestId,
           },
           type: QueryTypes.SELECT,
           raw: true,
@@ -87,7 +87,7 @@ export class TicketsService {
     }
   }
 
-  async GetTicketsByEmail(email: string) {
+  async getTicketsByEmail(email: string) {
     try {
       const tickets = await this.sequelize.query(
         'SP_GetTicketsByEmail @email=:email',
@@ -106,7 +106,7 @@ export class TicketsService {
     }
   }
 
-  async GetTicketsByScheduleDetailId(scheduleDetailId: string) {
+  async getTicketsByScheduleDetailId(scheduleDetailId: string) {
     try {
       const ticketContacts = await this.sequelize.query(
         'SP_GetTicketsByScheduleDetailId @scheduleDetailId=:scheduleDetailId',
@@ -123,5 +123,19 @@ export class TicketsService {
       this.logger.error(error.message);
       throw new DatabaseError(error);
     }
+  }
+
+  async getNumberOfTicketsByPartner(partnerId: string) {
+    try {
+      const numberOfTickets = await this.sequelize.query(
+        'SP_GetNumberOfTicketsByPartner @partnerId=:partnerId',
+        {
+          replacements: { partnerId },
+          type: QueryTypes.SELECT,
+          raw: true,
+        },
+      );
+      return numberOfTickets;
+    } catch (error) {}
   }
 }

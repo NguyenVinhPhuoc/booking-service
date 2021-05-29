@@ -15,16 +15,13 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { CreateTicketDto } from 'src/dtos/create-ticket.dto';
-import { GuestsService } from 'src/guests/guests.service';
 import { ContactsService } from 'src/contacts/contacts.service';
-import { vehicleType } from 'src/enums/vehicleType.enum';
 
 @Controller('tickets')
 export class TicketsController {
   private readonly logger = new Logger('TicketController');
   constructor(
     private readonly ticketsService: TicketsService,
-    private readonly guestsService: GuestsService,
     private readonly contactsService: ContactsService,
   ) {}
 
@@ -45,30 +42,29 @@ export class TicketsController {
       classId,
     } = createTicketDto;
     try {
-      const ticket = await this.ticketsService.postTicket(
-        scheduleDetailId,
-        totalPrice,
-        vehicleType,
-        captureId,
-        classId,
-      );
       const contactTemp = await this.contactsService.postContact(contact);
-      const guestsTemp = await Promise.all(
+      const ticketPrice = (totalPrice * 1.0) / guests.length;
+      const tickets = await Promise.all(
         guests.map(async (guest) => {
-          const guestTemp = await this.guestsService.postGuest(guest);
+          const ticket = await this.ticketsService.postTicket(
+            scheduleDetailId,
+            ticketPrice,
+            vehicleType,
+            captureId,
+            classId,
+            guest.title,
+            guest.fullName,
+          );
           await this.ticketsService.postTicketsDetail(
             ticket.id,
             contactTemp.id,
-            guestTemp.id,
           );
-          return guestTemp;
+          return ticket;
         }),
       );
       return {
-        ...ticket,
-        guestsTemp,
+        tickets,
         contactTemp,
-        numberOfTicket: guests.length,
       };
     } catch (error) {
       this.logger.error(error.message);
@@ -83,7 +79,7 @@ export class TicketsController {
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
     try {
-      const tickets = await this.ticketsService.GetTicketsByEmail(email);
+      const tickets = await this.ticketsService.getTicketsByEmail(email);
       return tickets;
     } catch (error) {
       this.logger.error(error.message);
@@ -101,10 +97,30 @@ export class TicketsController {
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
     try {
-      const tickets = await this.ticketsService.GetTicketsByScheduleDetailId(
+      const tickets = await this.ticketsService.getTicketsByScheduleDetailId(
         scheduleDetailId,
       );
       return tickets;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw HttpStatus.SERVICE_UNAVAILABLE;
+    } finally {
+      channel.ack(originalMessage);
+    }
+  }
+
+  @MessagePattern('get_number_of_tickets_by_partner')
+  async getTicketByPartner(
+    @Payload() partnerId: string,
+    @Ctx() context: RmqContext,
+  ) {
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
+    try {
+      const numberOfTickets = await this.ticketsService.getNumberOfTicketsByPartner(
+        partnerId,
+      );
+      return numberOfTickets;
     } catch (error) {
       this.logger.error(error.message);
       throw HttpStatus.SERVICE_UNAVAILABLE;

@@ -17,7 +17,6 @@ export class TicketPoliciesController {
   ) {}
 
   @MessagePattern('refund_ticket')
-  @Patch()
   async createCancellationTicket(
     @Payload() cancellationTicketDto: CancellationTicketDto,
     @Ctx() context: RmqContext,
@@ -28,11 +27,15 @@ export class TicketPoliciesController {
       const cancellationTicket = await this.ticketPoliciesService.createCancellationTicket(
         cancellationTicketDto,
       );
-      await this.paymentService.refundOrder(
+      const response = await this.paymentService.refundOrder(
         cancellationTicket.captureId,
         false,
         cancellationTicket.refundAmount,
       );
+
+      if (response.status !== '200')
+        return { message: 'Thanh toan khong thanh cong', response };
+
       return {
         cancellationTicket,
       };
@@ -42,4 +45,7 @@ export class TicketPoliciesController {
       channel.ack(originalMessage);
     }
   }
+
+  @MessagePattern('exchange_ticket')
+  async createExchangeTicket() {}
 }

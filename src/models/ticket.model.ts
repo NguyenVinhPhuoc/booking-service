@@ -9,5 +9,4 @@ export class Ticket extends Model {
   vehicleType: vehicleType;
   createdAt: string;
   updatedAt: string;
-  numberOfTicket: number;
 }
