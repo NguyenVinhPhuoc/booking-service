@@ -21,8 +21,8 @@ export class TicketsService {
   ) {
     try {
       const ticket = await this.sequelize.query(
-        `SP_CreateTicket @scheduleDetailId=:scheduleDetailId` +
-          `, @vehicleType=:vehicleType, @captureId=:captureId, ` +
+        `SP_CreateTicket @scheduleDetailId=:scheduleDetailId, ` +
+          `@ticketPrice=:ticketPrice, @vehicleType=:vehicleType, @captureId=:captureId, ` +
           `@classId=:classId, @title=:title, @fullName=:fullName`,
         {
           replacements: {
