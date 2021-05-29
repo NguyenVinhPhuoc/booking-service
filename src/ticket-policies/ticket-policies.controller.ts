@@ -34,7 +34,7 @@ export class TicketPoliciesController {
       );
 
       if (response.status !== '200')
-        return { message: 'Thanh toan khong thanh cong', response };
+        return { message: 'Thanh toán không thành công', response };
 
       return {
         cancellationTicket,
