@@ -6,6 +6,7 @@ export class CreateTicketDto {
   vehicleType: string;
   captureId: string;
   classId: string;
+  partnerId: string;
   contact: CreateContactDto;
   guests: CreateGuestDto[];
 }

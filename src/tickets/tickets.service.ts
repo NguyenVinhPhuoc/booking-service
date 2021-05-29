@@ -18,12 +18,13 @@ export class TicketsService {
     classId: string,
     title: string,
     fullName: string,
+    partnerId: string,
   ) {
     try {
       const ticket = await this.sequelize.query(
         `SP_CreateTicket @scheduleDetailId=:scheduleDetailId, ` +
           `@ticketPrice=:ticketPrice, @vehicleType=:vehicleType, @captureId=:captureId, ` +
-          `@classId=:classId, @title=:title, @fullName=:fullName`,
+          `@classId=:classId, @title=:title, @fullName=:fullName, @partnerId=:partnerId`,
         {
           replacements: {
             scheduleDetailId: scheduleDetailId,
@@ -33,6 +34,7 @@ export class TicketsService {
             classId: classId,
             title: title,
             fullName: fullName,
+            partnerId: partnerId,
           },
           type: QueryTypes.SELECT,
           mapToModel: true,

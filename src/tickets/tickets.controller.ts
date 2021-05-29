@@ -40,6 +40,7 @@ export class TicketsController {
       captureId,
       vehicleType,
       classId,
+      partnerId,
     } = createTicketDto;
     try {
       const contactTemp = await this.contactsService.postContact(contact);
@@ -54,6 +55,7 @@ export class TicketsController {
             classId,
             guest.title,
             guest.fullName,
+            partnerId,
           );
           await this.ticketsService.postTicketsDetail(
             ticket.id,
