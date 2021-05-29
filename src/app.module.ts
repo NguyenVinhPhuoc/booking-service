@@ -5,7 +5,6 @@ import { TicketsModule } from './tickets/tickets.module';
 import { TicketsController } from './tickets/tickets.controller';
 import { TicketsService } from './tickets/tickets.service';
 import { ContactsModule } from './contacts/contacts.module';
-import { GuestsModule } from './guests/guests.module';
 import { TicketPoliciesModule } from './ticket-policies/ticket-policies.module';
 import { PaymentModule } from './payment/payment.module';
 
@@ -22,7 +21,6 @@ import { PaymentModule } from './payment/payment.module';
     }),
     TicketsModule,
     ContactsModule,
-    GuestsModule,
     TicketPoliciesModule,
     PaymentModule,
   ],

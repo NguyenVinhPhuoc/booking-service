@@ -7,6 +7,10 @@ export class Ticket extends Model {
   totalPrice: number;
   captureId: string;
   vehicleType: vehicleType;
+  classId: string;
+  title: string;
+  fullName: string;
+  partnerId: string;
   createdAt: string;
   updatedAt: string;
 }
