@@ -130,12 +130,12 @@ export class TicketsService {
     }
   }
 
-  async getNumberOfTicketsByPartner(partnerId: string) {
+  async getNumberOfTicketsByPartner(partnerId: string, year: string) {
     try {
       const numberOfTickets = await this.sequelize.query(
-        'SP_GetNumberOfTicketsByPartner @partnerId=:partnerId',
+        'SP_GetNumberOfTicketsByPartner @partnerId=:partnerId, @year=:year',
         {
-          replacements: { partnerId },
+          replacements: { partnerId: partnerId, year: year },
           type: QueryTypes.SELECT,
           raw: true,
         },
