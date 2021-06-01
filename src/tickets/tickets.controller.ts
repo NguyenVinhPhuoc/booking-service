@@ -110,15 +110,15 @@ export class TicketsController {
 
   @MessagePattern('get_number_of_tickets_by_partner')
   async getTicketByPartner(
-    @Payload() data:{partnerId: string,
-    year:string}
+    @Payload() data: { partnerId: string; year: string },
     @Ctx() context: RmqContext,
   ) {
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
     try {
       const numberOfTickets = await this.ticketsService.getNumberOfTicketsByPartner(
-        data.partnerId,data.year
+        data.partnerId,
+        data.year,
       );
       return numberOfTickets;
     } catch (error) {
