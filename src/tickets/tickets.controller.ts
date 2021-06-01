@@ -56,9 +56,6 @@ export class TicketsController {
             guest.title,
             guest.fullName,
             partnerId,
-          );
-          await this.ticketsService.postTicketsDetail(
-            ticket.id,
             contactTemp.id,
           );
           return ticket;
@@ -123,6 +120,21 @@ export class TicketsController {
         partnerId,
       );
       return numberOfTickets;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw HttpStatus.SERVICE_UNAVAILABLE;
+    } finally {
+      channel.ack(originalMessage);
+    }
+  }
+
+  @MessagePattern('get_ticket_by_id')
+  async getTicketById(@Payload() id: string, @Ctx() context: RmqContext) {
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
+    try {
+      const ticket = await this.ticketsService.getTicketById(id);
+      return ticket;
     } catch (error) {
       this.logger.error(error.message);
       throw HttpStatus.SERVICE_UNAVAILABLE;

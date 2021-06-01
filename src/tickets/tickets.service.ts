@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { raw } from 'express';
 import { DatabaseError, QueryTypes } from 'sequelize';
 import { Sequelize } from 'sequelize';
 import { TicketContact } from 'src/models/get-ticket-contact.model';
@@ -19,12 +20,13 @@ export class TicketsService {
     title: string,
     fullName: string,
     partnerId: string,
+    contactId: string,
   ) {
     try {
       const ticket = await this.sequelize.query(
         `SP_CreateTicket @scheduleDetailId=:scheduleDetailId, ` +
           `@ticketPrice=:ticketPrice, @vehicleType=:vehicleType, @captureId=:captureId, ` +
-          `@classId=:classId, @title=:title, @fullName=:fullName, @partnerId=:partnerId`,
+          `@classId=:classId, @title=:title, @fullName=:fullName, @partnerId=:partnerId, @contactId=:contactId `,
         {
           replacements: {
             scheduleDetailId: scheduleDetailId,
@@ -35,6 +37,7 @@ export class TicketsService {
             title: title,
             fullName: fullName,
             partnerId: partnerId,
+            contactId: contactId,
           },
           type: QueryTypes.SELECT,
           mapToModel: true,
@@ -138,6 +141,25 @@ export class TicketsService {
         },
       );
       return numberOfTickets;
-    } catch (error) {}
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
+  }
+
+  async getTicketById(id: string) {
+    try {
+      const ticket = await this.sequelize.query('SP_GetTicketById', {
+        replacements: { id },
+        type: QueryTypes.SELECT,
+        raw: true,
+        mapToModel: true,
+        model: Ticket,
+      });
+      return ticket[0];
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new DatabaseError(error);
+    }
   }
 }
