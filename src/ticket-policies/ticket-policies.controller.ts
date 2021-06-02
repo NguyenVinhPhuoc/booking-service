@@ -53,7 +53,7 @@ export class TicketPoliciesController {
 
   @MessagePattern('exchange_ticket_without_refund')
   async createExchangeTicket(
-    exchangeTicketDto: ExchangeTicketDto,
+    @Payload() exchangeTicketDto: ExchangeTicketDto,
     @Ctx() context: RmqContext,
   ) {
     const channel = context.getChannelRef();
