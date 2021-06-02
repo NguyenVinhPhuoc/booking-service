@@ -35,9 +35,13 @@ export class TicketPoliciesService {
   async createExchangeTicket(exchangeTicketDto: ExchangeTicketDto) {
     try {
       const exchangeTicket = await this.sequelize.query(
-        'SP_CreateExchangeTicket @oldTicketId=:oldTicketId,@lostPercentage=:lostPercentage,@newTicket=:newTicketId',
+        'SP_CreateExchangeTicket @oldTicketId=:oldTicketId, @lostPercentage=:lostPercentage, @newTicketId=:newTicketId',
         {
-          replacements: { exchangeTicketDto },
+          replacements: {
+            oldTicketId: exchangeTicketDto.oldTicketId,
+            lostPercentage: exchangeTicketDto.lostPercentage,
+            newTicketId: exchangeTicketDto.newTicketId,
+          },
           raw: true,
         },
       );
