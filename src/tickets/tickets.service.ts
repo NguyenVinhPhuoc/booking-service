@@ -149,8 +149,8 @@ export class TicketsService {
 
   async getTicketById(id: string) {
     try {
-      const ticket = await this.sequelize.query('SP_GetTicketById', {
-        replacements: { id },
+      const ticket = await this.sequelize.query('SP_GetTicketById @id=:id', {
+        replacements: { id: id },
         type: QueryTypes.SELECT,
         raw: true,
         mapToModel: true,

@@ -14,6 +14,7 @@ export class PaymentService {
   client() {
     return new paypal.core.PayPalHttpClient(this.environment());
   }
+
   async prettyPrint(jsonData, pre = '') {
     let pretty = '';
     function capitalize(string) {
