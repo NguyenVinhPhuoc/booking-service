@@ -98,12 +98,15 @@ export class TicketPoliciesController {
       const oldTicket = await this.ticketService.getTicketById(
         data.oldTicketId,
       );
-      const refundAmount =
-        Math.abs(
-          data.totalPrice -
-            (oldTicket.ticketPrice -
-              (oldTicket.ticketPrice * data.lostPercentage) / 100),
-        ) / 23000;
+      const refundAmount = parseFloat(
+        (
+          Math.abs(
+            data.totalPrice -
+              (oldTicket.ticketPrice -
+                (oldTicket.ticketPrice * data.lostPercentage) / 100),
+          ) / 23000
+        ).toFixed(2),
+      );
       if (refundAmount > oldTicket.ticketPrice)
         throw new HttpException(
           'Tiền hoàn lại không thể lớn hơn tiền vé bị đổi',
