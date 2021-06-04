@@ -105,17 +105,16 @@ export class TicketPoliciesController {
           'Tiền hoàn lại không thể lớn hơn tiền vé bị đổi',
           HttpStatus.CONFLICT,
         );
-      return { oldTicket, refundAmount };
-      // const refundStatus = await this.paymentService.refundOrder(
-      //   oldTicket.captureId,
-      //   false,
-      //   refundAmount,
-      // );
-      // if (refundStatus.status !== 'COMPLETED')
-      //   throw new HttpException(
-      //     `Không thể hoàn lại thanh toán này, status:${refundStatus.status}`,
-      //     HttpStatus.CONFLICT,
-      //   );
+      const refundStatus = await this.paymentService.refundOrder(
+        oldTicket.captureId,
+        false,
+        refundAmount,
+      );
+      if (refundStatus.status !== 'COMPLETED')
+        throw new HttpException(
+          `Không thể hoàn lại thanh toán này, status:${refundStatus.status}`,
+          HttpStatus.CONFLICT,
+        );
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(

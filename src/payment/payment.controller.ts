@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   HttpStatus,
@@ -21,6 +22,22 @@ export class PaymentController {
         refundAmount,
       );
       return res.status;
+    } catch (error) {
+      this.logger.error(error.message);
+      throw HttpStatus.SERVICE_UNAVAILABLE;
+    }
+  }
+
+  async sendFund(@Body() data: { email: string; value: number }) {
+    try {
+      const respone = await this.paymentService.sendFund(
+        data.email,
+        data.value,
+      );
+      const captureId = await this.paymentService.getCaptureId(
+        respone.result.id,
+      );
+      return respone;
     } catch (error) {
       this.logger.error(error.message);
       throw HttpStatus.SERVICE_UNAVAILABLE;

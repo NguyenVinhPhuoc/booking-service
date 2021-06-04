@@ -36,21 +36,21 @@ export class PaymentService {
   }
 
   async createOrder(value: number) {
-    const request = new paypal.orders.OrdersCreateRequest();
-    request.prefer('return=representation');
-    request.requestBody({
-      intent: 'CAPTURE',
-      purchase_units: [
-        {
-          amount: {
-            currency_code: 'USD',
-            value: value,
-          },
-        },
-      ],
-    });
     let order;
     try {
+      const request = new paypal.orders.OrdersCreateRequest();
+      request.prefer('return=representation');
+      request.requestBody({
+        intent: 'CAPTURE',
+        purchase_units: [
+          {
+            amount: {
+              currency_code: 'USD',
+              value: value,
+            },
+          },
+        ],
+      });
       order = await this.client().execute(request);
       console.log(await this.prettyPrint(order));
       console.log(await this.prettyPrint(order.result));
@@ -97,8 +97,35 @@ export class PaymentService {
       const captureID =
         capture.result.purchase_units[0].payments.captures[0].id;
       return captureID;
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      this.logger.error(error.message);
+    }
+  }
+
+  async sendFund(email: string, value: number) {
+    const request = new paypal.orders.OrdersCreateRequest();
+    request.prefer('return=representation');
+    request.requestBody({
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          amount: {
+            currency_code: 'USD',
+            value: value,
+          },
+          payee: {
+            email_address: email,
+          },
+        },
+      ],
+    });
+
+    let order;
+    try {
+      order = await this.client().execute(request);
+      return order;
+    } catch (error) {
+      this.logger.error(error.message);
     }
   }
 }
