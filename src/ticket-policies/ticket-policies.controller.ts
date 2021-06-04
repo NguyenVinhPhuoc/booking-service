@@ -115,6 +115,7 @@ export class TicketPoliciesController {
           `Không thể hoàn lại thanh toán này, status:${refundStatus.status}`,
           HttpStatus.CONFLICT,
         );
+      return { oldTicket, refundStatus };
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(
