@@ -1,4 +1,10 @@
-import { Controller, HttpStatus, Logger, Patch } from '@nestjs/common';
+import {
+  Controller,
+  HttpException,
+  HttpStatus,
+  Logger,
+  Patch,
+} from '@nestjs/common';
 import {
   Ctx,
   MessagePattern,
@@ -8,6 +14,7 @@ import {
 import { CancellationTicketDto } from 'src/dtos/create-cancel-ticket.dtos';
 import { ExchangeTicketDto } from 'src/dtos/create-exchange-ticket.dtos';
 import { PaymentService } from 'src/payment/payment.service';
+import { TicketsService } from 'src/tickets/tickets.service';
 import { TicketPoliciesService } from './ticket-policies.service';
 
 @Controller('ticket-policies')
@@ -17,6 +24,7 @@ export class TicketPoliciesController {
   constructor(
     private readonly ticketPoliciesService: TicketPoliciesService,
     private readonly paymentService: PaymentService,
+    private readonly ticketService: TicketsService,
   ) {}
 
   @MessagePattern('refund_ticket')
@@ -36,7 +44,7 @@ export class TicketPoliciesController {
         cancellationTicket.refundAmount,
       );
 
-      if (response.status !== '200') {
+      if (response.status !== 'COMPLETED') {
         return { message: 'Thanh toán không thành công', response };
         //Thieu kich hoat lai ve
       }
@@ -53,7 +61,7 @@ export class TicketPoliciesController {
 
   @MessagePattern('exchange_ticket_without_refund')
   async createExchangeTicket(
-    exchangeTicketDto: ExchangeTicketDto,
+    @Payload() exchangeTicketDto: ExchangeTicketDto,
     @Ctx() context: RmqContext,
   ) {
     const channel = context.getChannelRef();
@@ -65,7 +73,62 @@ export class TicketPoliciesController {
       return exchangeTicket;
     } catch (error) {
       this.logger.error(error.message);
-      throw HttpStatus.SERVICE_UNAVAILABLE;
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    } finally {
+      channel.ack(originalMessage);
+    }
+  }
+
+  @MessagePattern('exchange_ticket_with_refund')
+  async createExchangeTicketRefund(
+    @Payload()
+    data: {
+      oldTicketId: string;
+      lostPercentage: number;
+      totalPrice: number;
+    },
+    @Ctx() context: RmqContext,
+  ) {
+    const channel = context.getChannelRef();
+    const originalMessage = context.getMessage();
+    try {
+      const oldTicket = await this.ticketService.getTicketById(
+        data.oldTicketId,
+      );
+      const refundAmount = parseFloat(
+        (
+          Math.abs(
+            data.totalPrice -
+              (oldTicket.ticketPrice -
+                (oldTicket.ticketPrice * data.lostPercentage) / 100),
+          ) / 23000
+        ).toFixed(2),
+      );
+      if (refundAmount > oldTicket.ticketPrice)
+        throw new HttpException(
+          'Tiền hoàn lại không thể lớn hơn tiền vé bị đổi',
+          HttpStatus.CONFLICT,
+        );
+      const refundStatus = await this.paymentService.refundOrder(
+        oldTicket.captureId,
+        false,
+        refundAmount,
+      );
+      if (refundStatus.status !== 'COMPLETED')
+        throw new HttpException(
+          `Không thể hoàn lại thanh toán này, status:${refundStatus.status}`,
+          HttpStatus.CONFLICT,
+        );
+      return { oldTicket, refundStatus };
+    } catch (error) {
+      this.logger.error(error.message);
+      throw new HttpException(
+        error.message,
+        error?.status || HttpStatus.SERVICE_UNAVAILABLE,
+      );
     } finally {
       channel.ack(originalMessage);
     }
