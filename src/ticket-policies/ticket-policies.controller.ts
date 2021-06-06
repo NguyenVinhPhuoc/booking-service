@@ -63,10 +63,13 @@ export class TicketPoliciesController {
     const channel = context.getChannelRef();
     const originalMessage = context.getMessage();
     try {
+      const oldTicket = await this.ticketService.getTicketById(
+        exchangeTicketDto.oldTicketId,
+      );
       const exchangeTicket = await this.ticketPoliciesService.createExchangeTicket(
         exchangeTicketDto,
       );
-      return exchangeTicket;
+      return { oldTicket, exchangeTicket };
     } catch (error) {
       this.logger.error(error.message);
       throw new HttpException(
@@ -113,11 +116,6 @@ export class TicketPoliciesController {
         false,
         refundAmount,
       );
-      if (refundStatus.status !== 'COMPLETED')
-        throw new HttpException(
-          `Không thể hoàn lại thanh toán này, status:${refundStatus.status}`,
-          HttpStatus.CONFLICT,
-        );
       return { oldTicket, refundStatus };
     } catch (error) {
       this.logger.error(error.message);
