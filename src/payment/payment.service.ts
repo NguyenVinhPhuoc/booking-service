@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Sequelize } from 'sequelize';
 const paypal = require('@paypal/checkout-server-sdk');
 
@@ -87,6 +87,7 @@ export class PaymentService {
       return response;
     } catch (error) {
       this.logger.error(error.message);
+      throw new HttpException(error.message, HttpStatus.SERVICE_UNAVAILABLE);
     }
   }
 

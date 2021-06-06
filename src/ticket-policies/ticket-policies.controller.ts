@@ -43,13 +43,9 @@ export class TicketPoliciesController {
         false,
         cancellationTicket.refundAmount,
       );
-
-      if (response.status !== 'COMPLETED') {
-        return { message: 'Thanh toán không thành công', response };
-        //Thieu kich hoat lai ve
-      }
       return {
         cancellationTicket,
+        response,
       };
     } catch (error) {
       this.logger.error(error.message);
