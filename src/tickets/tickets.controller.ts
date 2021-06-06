@@ -1,21 +1,13 @@
-import {
-  Controller,
-  Logger,
-  HttpStatus,
-  Body,
-  Post,
-  Query,
-  Get,
-} from '@nestjs/common';
-import { TicketsService } from './tickets.service';
+import { Controller, HttpStatus, Logger } from '@nestjs/common';
 import {
   Ctx,
   MessagePattern,
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
-import { CreateTicketDto } from 'src/dtos/create-ticket.dto';
 import { ContactsService } from 'src/contacts/contacts.service';
+import { CreateTicketDto } from 'src/dtos/create-ticket.dto';
+import { TicketsService } from './tickets.service';
 
 @Controller('tickets')
 export class TicketsController {
